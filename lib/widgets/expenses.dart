@@ -32,6 +32,9 @@ class _ExpensesState extends State<Expenses> {
 
   void _openAddExpenseOverload() {
     showModalBottomSheet(
+      // aggiunge padding in automatico nel caso che la modal venga 
+      // oscurata da parti native del device..
+        useSafeArea: true,
         isScrollControlled: true,
         context: context,
         builder: (modalctx) => NewExpense(addNewExpense));
@@ -54,7 +57,7 @@ class _ExpensesState extends State<Expenses> {
             label: 'undu',
             onPressed: () {
               setState(() {
-                _registreredEspenses.insert(expenseIndex,item);
+                _registreredEspenses.insert(expenseIndex, item);
               });
             },
           )));
@@ -63,15 +66,25 @@ class _ExpensesState extends State<Expenses> {
 
   @override
   Widget build(BuildContext context) {
+    // permette di salvare la width del device così da utilizzarla in un rendering condizionale
+    var width = MediaQuery.sizeOf(context).width;
     return Scaffold(
-        appBar: AppBar(title: const Text("Flutter ExpenseTracker"), actions: [
-          IconButton(onPressed: _openAddExpenseOverload, icon: Icon(Icons.add))
-        ]),
-        body: Column(
-          children: [
-            Chart(expenses: _registreredEspenses),
-            Expanded(child: ExpenseList(_registreredEspenses, removeExpense))
-          ],
-        ));
+      appBar: AppBar(title: const Text("Flutter ExpenseTracker"), actions: [
+        IconButton(onPressed: _openAddExpenseOverload, icon: Icon(Icons.add))
+      ]),
+      body: width < 600
+          ? Column(
+              children: [
+                Chart(expenses: _registreredEspenses),
+                Expanded(
+                    child: ExpenseList(_registreredEspenses, removeExpense))
+              ],
+            )
+          : Row(children: [
+            // devo wrappare anche chart in un expanded altrimenti Flutter non può renderizzare correttamente la width
+              Expanded(child: Chart(expenses: _registreredEspenses)),
+              Expanded(child: ExpenseList(_registreredEspenses, removeExpense))
+            ]),
+    );
   }
 }
